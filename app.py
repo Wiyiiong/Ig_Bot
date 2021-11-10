@@ -1,11 +1,13 @@
 #  Copyright (c)  Ong Wi Yi .
 
 from flask import Flask
+from flask_cors import CORS
 
 from ClientManagement.API.VoucherAPI import voucher_bp
 from ClientManagement.Exception.ExceptionHandler import *
 
 app = Flask(__name__)
+CORS(app)
 app.register_error_handler(400, handle_bad_request_error)
 app.register_error_handler(401, handle_unauthorized_error)
 app.register_error_handler(403, handle_forbidden_error)

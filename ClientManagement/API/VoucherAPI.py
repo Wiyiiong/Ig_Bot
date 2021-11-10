@@ -6,6 +6,7 @@ from werkzeug.exceptions import abort
 
 from ClientManagement.Class.Voucher.Voucher import Voucher
 from ClientManagement.Exception.ExceptionHandler import RESOURCE_NOT_FOUND
+from ClientManagement.Util.VoucherCodeGenerator import VoucherCodeGenerator
 from Config.FirebaseSetup import db
 
 voucher_ref = db.collection('voucher')
@@ -25,13 +26,34 @@ def create_voucher():
         valid_duration = request.form['duration']
         name = request.form['name']
 
-        voucher = Voucher(voucher_type, value, valid_duration, name)
+        docs = voucher_ref.stream()
+        code_lists = [d.id for d in docs]
+        code = VoucherCodeGenerator.generate_code(code_lists)
 
-        voucher_ref.add(voucher.to_dict())
+        voucher = Voucher(voucher_type, value, valid_duration, name, code)
+
+        voucher_ref.document(voucher.code).set(voucher.to_dict())
         return jsonify({"success": True}), 201
     except FirebaseError as e:
         abort(e.code, description=e)
     except Exception as e:
+        abort(500, description=e)
+
+
+@voucher_bp.route('/vouchers/', methods=["GET"])
+def get_vouchers():
+    """
+    Retrieve all voucher from the databasr
+    :return: List of vouchers
+    """
+    try:
+        docs = voucher_ref.stream()
+        data = [d.to_dict() for d in docs]
+        return jsonify({'success': True, 'data': data}), 200
+
+    except FirebaseError as e:
+        abort(e.code, description=e)
+    except TypeError as e:
         abort(500, description=e)
 
 
@@ -43,8 +65,8 @@ def get_voucher():
     """
     try:
         tp = request.args.get("type")
-        document_id = request.args.get("document")
-        doc_ref = voucher_ref.document(str(document_id))
+        code = request.args.get("code")
+        doc_ref = voucher_ref.document(code)
         doc = doc_ref.get()
         if doc.exists:
             data = doc.to_dict()
@@ -54,10 +76,8 @@ def get_voucher():
                 voucher = Voucher.from_dict(data)
                 return jsonify({'success': True, 'data': voucher.generate_voucher_image()}), 200
         else:
-            abort(404, description=RESOURCE_NOT_FOUND.format(document_id))
+            abort(404, description=RESOURCE_NOT_FOUND.format(code))
     except NotFoundError as e:
         abort(e.code, description=e)
     except FirebaseError as e:
         abort(e.code, description=e)
-    except Exception as e:
-        abort(500, description=e)
