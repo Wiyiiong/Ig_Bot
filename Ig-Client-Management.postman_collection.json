@@ -1,0 +1,160 @@
+{
+  "info": {
+    "_postman_id": "35938791-73ca-4c64-91c6-a8784dd21278",
+    "name": "Ig-Client-Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Voucher",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "voucher_type",
+              "value": "SEASONAL_PROMO",
+              "type": "text"
+            },
+            {
+              "key": "value",
+              "value": "RM 10",
+              "type": "text"
+            },
+            {
+              "key": "duration",
+              "value": "14",
+              "type": "text"
+            },
+            {
+              "key": "name",
+              "value": "Client2",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{http}}://{{service-url}}/voucher/",
+          "protocol": "{{http}}",
+          "host": [
+            "{{service-url}}"
+          ],
+          "path": [
+            "voucher",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Vouchers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{http}}://{{service-url}}/vouchers/",
+          "protocol": "{{http}}",
+          "host": [
+            "{{service-url}}"
+          ],
+          "path": [
+            "vouchers",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Voucher Info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{http}}://{{service-url}}/voucher/?document=KTANNB707553&type=info",
+          "protocol": "{{http}}",
+          "host": [
+            "{{service-url}}"
+          ],
+          "path": [
+            "voucher",
+            ""
+          ],
+          "query": [
+            {
+              "key": "document",
+              "value": "KTANNB707553"
+            },
+            {
+              "key": "type",
+              "value": "info"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Voucher Image",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{http}}://{{service-url}}/voucher/?code=KTANNB707553&type=image",
+          "protocol": "{{http}}",
+          "host": [
+            "{{service-url}}"
+          ],
+          "path": [
+            "voucher",
+            ""
+          ],
+          "query": [
+            {
+              "key": "code",
+              "value": "KTANNB707553"
+            },
+            {
+              "key": "type",
+              "value": "image"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Redeem Voucher",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "redeemed",
+              "value": "true",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{http}}://{{service-url}}/voucher/redeemed/KTANNB707553",
+          "protocol": "{{http}}",
+          "host": [
+            "{{service-url}}"
+          ],
+          "path": [
+            "voucher",
+            "redeemed",
+            "KTANNB707553"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

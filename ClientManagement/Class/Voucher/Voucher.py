@@ -37,7 +37,7 @@ class Voucher:
 
     # Retrieve voucher expiry date
     def get_expiry_date(self):
-        expiry_date = self.release_date + timedelta(days=self.valid_duration)
+        expiry_date = self.release_date + timedelta(days=int(self.valid_duration))
         return expiry_date.strftime(date_format)
 
     # Generate voucher image
@@ -67,7 +67,8 @@ class Voucher:
     @staticmethod
     def from_dict(source):
         voucher = Voucher(source['voucher_type'], source['value'], int(source['valid_duration']), source['name'],
-                          source['code'], redeemed=source['redeemed'], release_date=source['release_date'])
+                          source['code'], redeemed=source['redeemed'],
+                          release_date=datetime.strptime(source['release_date'], date_format))
         if 'redeemed_on' in source:
             voucher.redeemed_on = source['redeemed_on']
         return voucher

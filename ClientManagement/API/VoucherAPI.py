@@ -30,7 +30,7 @@ def create_voucher():
         code_lists = [d.id for d in docs]
         code = VoucherCodeGenerator.generate_code(code_lists)
 
-        voucher = Voucher(voucher_type, value, valid_duration, name, code)
+        voucher = Voucher(voucher_type, value, int(valid_duration), name, code)
 
         voucher_ref.document(voucher.code).set(voucher.to_dict())
         return jsonify({"success": True}), 201
@@ -43,7 +43,7 @@ def create_voucher():
 @voucher_bp.route('/vouchers/', methods=["GET"])
 def get_vouchers():
     """
-    Retrieve all voucher from the databasr
+    Retrieve all voucher from the database
     :return: List of vouchers
     """
     try:
@@ -57,15 +57,15 @@ def get_vouchers():
         abort(500, description=e)
 
 
-@voucher_bp.route('/voucher/', methods=["GET"])
-def get_voucher():
+@voucher_bp.route('/voucher/<id>', methods=["GET"])
+def get_voucher(id):
     """
     Retrieve the voucher details or image in json format
     :return: json object of Voucher Response
     """
     try:
         tp = request.args.get("type")
-        code = request.args.get("code")
+        code = id
         doc_ref = voucher_ref.document(code)
         doc = doc_ref.get()
         if doc.exists:
@@ -77,6 +77,24 @@ def get_voucher():
                 return jsonify({'success': True, 'data': voucher.generate_voucher_image()}), 200
         else:
             abort(404, description=RESOURCE_NOT_FOUND.format(code))
+    except NotFoundError as e:
+        abort(e.code, description=e)
+    except FirebaseError as e:
+        abort(e.code, description=e)
+
+
+@voucher_bp.route('/voucher/redeemed/<id>', methods=["PUT"])
+def set_voucher_to_redeemed(id):
+    """
+    Set voucher to redeemed via the voucher code
+    :return: json object
+    """
+    try:
+        code = id
+        redeemed = True if request.form["redeemed"].lower() == "true" else False
+        doc_ref = voucher_ref.document(code)
+        doc_ref.set({u'redeemed': redeemed}, merge=True)
+        return jsonify({"success": True}), 200
     except NotFoundError as e:
         abort(e.code, description=e)
     except FirebaseError as e:
