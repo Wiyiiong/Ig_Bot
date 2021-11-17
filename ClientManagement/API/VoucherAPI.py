@@ -1,14 +1,16 @@
 #  Copyright (c)  Ong Wi Yi .
+from datetime import datetime
 
 from firebase_admin.exceptions import FirebaseError, NotFoundError
 from flask import Blueprint, jsonify, request
 from werkzeug.exceptions import abort
 
-from ClientManagement.Class.Voucher.Voucher import Voucher
+from ClientManagement.Class.Voucher.Voucher import date_format, Voucher
 from ClientManagement.Exception.ExceptionHandler import RESOURCE_NOT_FOUND
 from ClientManagement.Util.VoucherCodeGenerator import VoucherCodeGenerator
-from Config.FirebaseSetup import db
+from Config.FirebaseSetup import setup_firebase
 
+db = setup_firebase()
 voucher_ref = db.collection('voucher')
 
 voucher_bp = Blueprint('voucher', __name__)
@@ -91,10 +93,15 @@ def set_voucher_to_redeemed(id):
     """
     try:
         code = id
-        redeemed = True if request.form["redeemed"].lower() == "true" else False
+        redeemed = request.get_json()['data']['redeemed']
         doc_ref = voucher_ref.document(code)
-        doc_ref.set({u'redeemed': redeemed}, merge=True)
-        return jsonify({"success": True}), 200
+        if redeemed:
+            doc_ref.set({u'redeemed': redeemed, u'redeemed_on': datetime.today().strftime(date_format)}, merge=True)
+        else:
+            doc_ref.set({u'redeemed': redeemed, u'redeemed_on': None}, merge=True)
+        doc = doc_ref.get()
+        data = doc.to_dict()
+        return jsonify({'success': True, 'data': data}), 200
     except NotFoundError as e:
         abort(e.code, description=e)
     except FirebaseError as e:
